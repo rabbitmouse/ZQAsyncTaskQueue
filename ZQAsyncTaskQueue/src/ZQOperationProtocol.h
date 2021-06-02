@@ -19,6 +19,10 @@ typedef void(^ZQAsyncOperationFinishBlock)(BOOL isSuccess ,_Nullable id response
 
 @property (nonatomic, copy) ZQAsyncOperationFinishBlock finishedBlock;
 
+@optional
+
+@property (nonatomic, strong) id context;
+
 @end
 
 NS_ASSUME_NONNULL_END

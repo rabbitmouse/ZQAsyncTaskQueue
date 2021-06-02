@@ -26,8 +26,17 @@ NS_ASSUME_NONNULL_BEGIN
  * 每个任务完成或失败都会回调
  */
 - (NSArray<ZQAsyncOperation *> *)addBatchTasks:(NSArray<id<ZQOperation>> *)tasks
-            completed:(void(^)(id response))completedBlock
-              failure:(void(^)(id err))failureBlock;
+            completed:(void(^ _Nullable)(id response, id<ZQOperation> task))completedBlock
+              failure:(void(^ _Nullable)(id err, id<ZQOperation> task))failureBlock;
+
+/**
+ * 功能同上
+ * 支持全部任务完成后回调
+ */
+- (NSArray<ZQAsyncOperation *> *)addBatchTasks:(NSArray<id<ZQOperation>> *)tasks
+                                      finished:(void(^ _Nullable)(void))finished
+                                     completed:(void(^ _Nullable)(id response, id<ZQOperation> task))completedBlock
+                                       failure:(void(^ _Nullable)(id err, id<ZQOperation> task))failureBlock;
 
 /**
  * 添加一批异步任务
@@ -35,8 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
  * 一个失败全部失败
  */
 - (NSArray<ZQAsyncOperation *> *)addBatchTasksCombineResult:(NSArray<id<ZQOperation>> *)tasks
-            completed:(void(^)(id response))completedBlock
-              failure:(void(^)(id err))failureBlock;
+            completed:(void(^ _Nullable)(id response))completedBlock
+              failure:(void(^ _Nullable)(id err))failureBlock;
 
 @property (nonatomic, strong, readonly) NSArray<NSOperation *> *operations ;
 

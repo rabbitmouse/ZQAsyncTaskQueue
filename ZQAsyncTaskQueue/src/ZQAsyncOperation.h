@@ -19,6 +19,9 @@ typedef void(^ZQTaskCancelBlock)(void);
                          finished:(ZQTaskFinishedBlock)finishedBlock
                          canceled:(ZQTaskCancelBlock)cancelBlock;
 
+
+@property (nonatomic, strong) id<ZQOperation> operationTask;
+
 @end
 
 NS_ASSUME_NONNULL_END

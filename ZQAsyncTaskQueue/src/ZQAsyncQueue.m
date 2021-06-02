@@ -53,8 +53,19 @@
 }
 
 - (NSArray<ZQAsyncOperation *> *)addBatchTasks:(NSArray<id<ZQOperation>> *)tasks
-            completed:(void(^)(id response))completedBlock
-              failure:(void(^)(id err))failureBlock {
+                                     completed:(void(^ _Nullable)(id response, id<ZQOperation> task))completedBlock
+                                       failure:(void(^ _Nullable)(id err, id<ZQOperation> task))failureBlock {
+    
+    return [self addBatchTasks:tasks finished:nil completed:completedBlock failure:failureBlock];
+}
+
+- (NSArray<ZQAsyncOperation *> *)addBatchTasks:(NSArray<id<ZQOperation>> *)tasks
+                                      finished:(void(^ _Nullable)(void))finished
+                                     completed:(void(^ _Nullable)(id response, id<ZQOperation> task))completedBlock
+                                       failure:(void(^ _Nullable)(id err, id<ZQOperation> task))failureBlock {
+    if (tasks.count == 0) {
+        return @[];
+    }
     
     NSMutableArray<ZQAsyncOperation *> *opts = [NSMutableArray array];
     
@@ -64,26 +75,29 @@
             
             // 处理task的回调
             if (isSuccess) {
-                !completedBlock ?: completedBlock(response);
+                !completedBlock ?: completedBlock(response, task);
             } else {
-                !failureBlock ?: failureBlock(response);
+                !failureBlock ?: failureBlock(response, task);
             }
             
         } canceled:^{
-            !failureBlock ?: failureBlock([self constructCancelError]);
+            !failureBlock ?: failureBlock([self constructCancelError], task);
         }];
         
         [opts addObject:opt];
     }];
     
-    [self.operationQueue addOperations:opts waitUntilFinished:NO];
+    dispatch_async(self.concurrent, ^{
+        [self.operationQueue addOperations:opts waitUntilFinished:finished != nil];
+        !finished ?: finished();
+    });
     
     return [opts copy];
 }
 
 - (NSArray<ZQAsyncOperation *> *)addBatchTasksCombineResult:(NSArray<id<ZQOperation>> *)tasks
-            completed:(void(^)(id response))completedBlock
-            failure:(void(^)(id err))failureBlock {
+            completed:(void(^ _Nullable)(id response))completedBlock
+              failure:(void(^ _Nullable)(id err))failureBlock {
     
     __block BOOL allSuccess = YES;
     __block id error = nil;
@@ -141,7 +155,7 @@
 
 - (void)configOperationQueue {
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-    queue.maxConcurrentOperationCount = 100;
+    queue.maxConcurrentOperationCount = 20;
     
     self.operationQueue = queue;
 }

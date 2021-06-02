@@ -14,9 +14,6 @@
 //是否已经完成
 @property (assign, nonatomic, getter=isFinished) BOOL finished;
 
-@property (nonatomic, strong) id<ZQOperation> operationTask ;
-
-
 @property (nonatomic, copy) ZQTaskFinishedBlock finishedBlock;
 @property (nonatomic, copy) ZQTaskCancelBlock cancelBlock;
 
@@ -110,9 +107,8 @@
     if (self.operationTask) {
         [self.operationTask cancel];
     }
-    
-    // 清理
-    [self reset];
+    // 完成该任务
+    [self done];
 }
 
 
@@ -128,7 +124,6 @@
     self.cancelBlock = nil;
     self.finishedBlock = nil;
     self.thread = nil;
-    self.operationTask = nil;
 }
 
 #pragma mark - getter && setter
